@@ -162,7 +162,7 @@ class Phosphomatics(object):
         '''
         Upload phosphorylation site and quantitation data. Data file must be \
         in a phosphomatics-compatible format. See \
-        `here <https://www.phosphomatics.com/help>`_\ for details.
+        `here <https://www.phosphomatics.com/help>`_ for details.
 
         Args:
             file (str): Path to experimental data file.
@@ -198,7 +198,7 @@ class Phosphomatics(object):
         url = self.BASE_URL + '/uploadParameterSet'
         data = self.__getDefaultDict()
         requests.post(
-            url, data = data, files = {'file': open(file, 'rb')}
+            url, data = data, files = {'file': file}
         )
         return
 

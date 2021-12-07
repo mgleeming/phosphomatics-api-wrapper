@@ -3,14 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to phosphomatics-api-wrapper's documentation!
-=====================================================
+Welcome to the phosphomatics-api-wrapper documentation!
+=======================================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
+   introduction
+   parameter_files
+   usage_examples
 
 Indices and tables
 ==================
