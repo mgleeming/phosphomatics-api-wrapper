@@ -21,7 +21,7 @@ class Phosphomatics(object):
 
         self.key = key
         self.datasetToken = None
-        self.BASE_URL = 'http://127.0.0.1:8000'
+        self.BASE_URL = 'https://phosphomatics.com'
 
         self.validationRoutineExempt = [
             'startNewExperiment',
