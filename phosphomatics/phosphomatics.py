@@ -96,9 +96,14 @@ class Phosphomatics(object):
             time.sleep(1)
 
             r = requests.post(url, data = data)
-
-            if 'processingDone' in r.json():
-                return r.json()
+            r = r.json()
+            if 'processingDone' in r:
+                del r['processingDone']
+                try:
+                    del r['container']
+                except:
+                    pass
+                return r
         return
 
     def __updateGroupList(self):
@@ -132,7 +137,7 @@ class Phosphomatics(object):
         Get the datasetToken for the current analysis.
 
         Returns:
-            datasetToken (str): datasetToken for the current analysis
+            DatasetToken for the current analysis
         '''
         return self.datasetToken
 
@@ -142,7 +147,7 @@ class Phosphomatics(object):
         obtain a valid datasetToken.
 
         Returns:
-            datasetToken (str): datasetToken for the current analysis
+            DatasetToken for the current analysis
 
         Raises:
             Exception: Error generating datasetToken.
@@ -211,7 +216,6 @@ class Phosphomatics(object):
             NoDataSetTokenError: Raised if method called before a valid \
             datasetToken is obtained or set.
         '''
-
         url = self.BASE_URL + '/process'
         data = self.__addArgsToDefaultDict(args = { 'url': '/processSampleGroupings' })
         r = requests.post( url, data = data)
@@ -232,3 +236,260 @@ class Phosphomatics(object):
             r.json()['taskID'],
         )
         return result
+
+    def getUserDataGroups (self):
+        '''
+        Get all data groups that have been created.
+
+        Returns:
+            List of dicts containing group information.
+
+           Dicts have keys
+             - id (int) - anidentifier for this individual data group
+             - name (str) - data group name
+             - selected (str) - 'true' if the data group is currently active, 'false' if not
+
+        Raises:
+            NoDataSetTokenError: Raised if method called before a valid \
+            datasetToken is obtained or set.
+        '''
+        data = self.__addArgsToDefaultDict(args = {}, target = 'getUserDataGroups')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result['userDataGroups']
+
+    def getActiveDataGroup (self):
+        '''
+        Get the currently active data group
+
+        Returns:
+            Dict containing group information for selected data group.
+
+           Dict has keys
+             - id (int) - anidentifier for this individual data group
+             - name (str) - data group name
+             - selected (str) - 'true' if the data group is currently active, 'false' if not
+
+        Raises:
+            NoDataSetTokenError: Raised if method called before a valid \
+            datasetToken is obtained or set.
+        '''
+        data = self.__addArgsToDefaultDict(args = {}, target = 'getUserDataGroups')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        selected_group = [
+            _ for _ in result['userDataGroups'] if _['selected'] == 'true'
+        ]
+        if selected_group:
+            return selected_group[0]
+        else:
+            return None
+
+    def setSelectedGroup (self, id = None):
+        '''
+        Change the currently active data group.
+
+        Args:
+            id (int): Integer id of data group to be selected.
+
+        Raises:
+            NoDataSetTokenError: Raised if method called before a valid \
+            datasetToken is obtained or set.
+        '''
+
+        if not isinstance(id, int):
+            return None
+
+        data = self.__addArgsToDefaultDict(args = {'groupid': str(id)}, target = 'setSelectedGroup')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+        return
+
+    def makeDistributionPlot (self, sample = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeDistributionPlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeCorrelationMatrix (self, method = None, transform = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeCorrelationMatrix')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeQuantilePlot (self, container = None, sample = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeQuantilePlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeClusterMap (self, fc = None, pval = None, pvalType = None, numClusters = None, transformation = None, metric = None, method = None, container = None, targetClusters = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeClusterMap')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makePCAPlot (self, pval = None, pvalType = None, fc = None, transformation = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makePCAPlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeLDAPlot (self, pval = None, pvalType = None, fc = None, transformation = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeLDAPlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeVolcano (self, fc = None, pval = None, pvalType = None, group1 = None, group2 = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeVolcano')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeSCurve (self, group1 = None, group2 = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeSCurve')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def doKSEAAnslysis (self, group1 = None, group2 = None, networkin = None, networkinThreshold = None, mThreshold = None, pThreshold = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'doKSEAAnslysis')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makePhosphorylationNetworks (self, group1 = None, group2 = None, specificity = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makePhosphorylationNetworks')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def getEnrichmentForProteinList (self, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'getEnrichmentForProteinList')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def getSequenceAnslysis (self, displayType = None, palette = None, showN = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'getSequenceAnslysis')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeKinaseClusterMap (self, numClusters = None, transformation = None, palette = None, metric = None, method = None, specificity = None, container = None, targetClusters = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeKinaseClusterMap')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeKinaseVolcanoPlot (self, fc = None, pval = None, pvalType = None, group1 = None, group2 = None, container = None, specificity = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeKinaseVolcanoPlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeKinaseSCurve (self, group1 = None, group2 = None, specificity = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeKinaseSCurve')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def getQuantitationPlotForSelectedKinase (self, specificity = None, kinaseUPID = None, plotType = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'getQuantitationPlotForSelectedKinase')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeSubstrateCorrelationPlot (self, substrateUPID = None, position = None, residue = None, topN = None, method = None, plotType = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeSubstrateCorrelationPlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+
+    def makeFeatureAbundancePlot (self, substrateUPID = None, position = None, residue = None, plotType = None, container = None):
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeFeatureAbundancePlot')
+        url = self.BASE_URL + '/apiTask'
+        r = requests.post( url, data = data)
+
+        result = self.__monitorRemoteTask(
+            r.json()['taskID'],
+        )
+        return result
+

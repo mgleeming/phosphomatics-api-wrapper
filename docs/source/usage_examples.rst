@@ -1,6 +1,9 @@
 Usage Examples
 ==============
 
+Creating and running a new analysis
+-----------------------------------
+
 The example below shows how to create a new phosphomatics experiment, upload data and parameter files and run the initial data processing routine.
 
 .. code-block:: python
@@ -25,4 +28,19 @@ The example below shows how to create a new phosphomatics experiment, upload dat
 
     # print your datasetToken
     print(exp.getDataSetToken())
+
+The dataset token can then be used to visualise the results in the phosphomatics web server [here](https://www.phosphomatics.com/)
+
+Accessing a previous analysis
+-----------------------------
+
+.. code-block:: python
+
+    import phosphomaitcs.phosphomaitcs as pa
+
+    # Instantiate phosphomatics with your API key
+    exp = pa.Phosphomatics( key = 'YOUR_API_KEY')
+
+    # Set the dataset token for the previous analysis
+    exp.setDataSetToken('DATASET_TOKEN_FOR_PREV_ANALYSIS')
 
