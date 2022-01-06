@@ -5,22 +5,24 @@ Phosphomatics is a public resource for statistical and downstream analysis of ph
 
 This is very much a work in progress so use at your own risk.
 
-Getting Started
+Installation
 ---------------
-
-Clone the GitHub project::
-
-    git clone https://github.com/mgleeming/phosphomatics-api-wrapper.git
-    cd phosphomatics-api-wrapper
 
 Create a virtual environment::
 
     virtualenv venv
     source venv/bin/activate
 
-Install requirements::
+Either install from PyPi::
 
+    pip install phosphomatics-api-wrapper
+
+Or clone the GitHub repo and install manually::
+
+    git clone https://github.com/mgleeming/phosphomatics-api-wrapper.git
+    cd phosphomatics-api-wrapper
     pip install -r requirements.txt
+    python setup.py install
 
 API Keys
 --------
