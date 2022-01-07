@@ -1,9 +1,21 @@
-import os, sys, requests, json, time
+import os, sys, requests, json, time, inspect
+
+def get_kwargs():
+    frame = inspect.currentframe().f_back
+    keys, _, _, values = inspect.getargvalues(frame)
+    kwargs = {}
+    for key in keys:
+        if key != 'self':
+            kwargs[key] = values[key]
+    return kwargs
 
 class NoDataSetTokenError(Exception):
     pass
 
 class NoPhosphomaticsKey(Exception):
+    pass
+
+class InvalidKey(Exception):
     pass
 
 class Phosphomatics(object):
@@ -16,41 +28,24 @@ class Phosphomatics(object):
 
     def __init__(self, key = None):
 
-        if not key:
-            raise NoPhosphomaticsKey('A phosphomatics API key must be provided')
-
-        self.key = key
-        self.datasetToken = None
-        self.BASE_URL = 'https://phosphomatics.com'
-
         self.validationRoutineExempt = [
+            '__setKey',
+            '__setDefaultDict',
             'startNewExperiment',
             'setDataSetToken',
-            '__setDefaultDict',
             'getDataSetToken'
         ]
 
+        self.datasetToken = None
+
+#        self.BASE_URL = 'https://phosphomatics.com'
+        self.BASE_URL = 'http://127.0.0.1:8000'
+
+        if not key:
+            raise NoPhosphomaticsKey('A phosphomatics API key must be provided')
+        self.__setKey(key)
         self.__setDefaultDict()
         return
-
-    def __setDefaultDict(self):
-        self.default_params = {
-            'datasetToken': self.getDataSetToken(), 'key': self.key, 'api': True}
-        return
-
-    def __getDefaultDict(self):
-        return self.default_params
-
-    def __addArgsToDefaultDict(self, args = None, target = None):
-
-        data = self.__getDefaultDict()
-
-        if args:
-            data = {**data, **args}
-        if target:
-            data['apiFunctionTarget'] = target
-
-        return data
 
     def __getattribute__(self,name):
         """
@@ -76,6 +71,35 @@ class Phosphomatics(object):
             return newfunc
         else:
             return attr
+
+    def __setKey(self, key):
+        url = self.BASE_URL + '/authenticateAPIKey'
+        r = requests.post(url, data = { 'key': key })
+        if r.json()['valid'] == 'true':
+            self.key = key
+        else:
+            raise InvalidKey( 'The API key you have supplied is not avlid')
+            self.key = None
+        return
+
+    def __setDefaultDict(self):
+        self.default_params = {
+            'datasetToken': self.getDataSetToken(), 'key': self.key, 'api': True}
+        return
+
+    def __getDefaultDict(self):
+        return self.default_params
+
+    def __addArgsToDefaultDict(self, args = None, target = None):
+
+        data = self.__getDefaultDict()
+
+        if args:
+            data = {**data, **args}
+        if target:
+            data['apiFunctionTarget'] = target
+
+        return data
 
     def __monitorRemoteTask(self, taskID, supplemental_args = None):
 
@@ -104,21 +128,6 @@ class Phosphomatics(object):
                 except:
                     pass
                 return r
-        return
-
-    def __updateGroupList(self):
-
-        data = self.__addArgsToDefaultDict(target = 'getUserDataGroups')
-        url = self.BASE_URL + '/apiTask'
-        r = requests.post( url, data = data)
-        userDataGroups = self.__monitorRemoteTask(
-            r.json()['taskID'],
-        )
-        self.userDataGroups = userDataGroups['userDataGroups']
-        return
-
-    def __updateSelectedGroup(self):
-
         return
 
     def setDataSetToken(self, datasetToken):
@@ -353,8 +362,34 @@ class Phosphomatics(object):
         )
         return result
 
-    def makePCAPlot (self, pval = None, pvalType = None, fc = None, transformation = None, container = None):
-        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makePCAPlot')
+    def getPCA (self, pval = 0.5, pvalType = 'raw', fc = 0.5, transformation = None):
+        '''
+        Returns Principal Component Analysis for data in selected data group.
+
+        Args:
+            pval (float): p-value used to filter phosphorylation sites prior to analysis. Setting the p-value to 0 will allow all phosphorylation sites to pass. Default = 0.5.
+
+            pvalType (str): Either 'raw' for raw p-values or 'BH' for Benjamini-Hochberg adjusted p-values. Default = 'raw'.
+
+            fc (float): fold-change used to filter phosphorylation sites prior to analysis. Setting this to 0 will allow all phosphorylation sites to pass. In the case of a >2 group analysis, this corresponds to the ANOVA F-value. Default = 0.5.
+
+            transformation (str): Specifies if data should be z-transformed prior to analysis. Either 'Z-Transform' to conduct transformation or any other value for untransformed data.
+
+        Returns:
+            Dict containing PCA data.
+
+           Dict has keys
+             - data - list of dicts with x,y coordinates of samples on PC1 and PC2 axes. Dicts have keys 'x', 'y', 'label', 'group'.
+             - xLabel - PC axis of x co-ordinates and percentage of explained variation.
+             - yLabel - PC axis of y co-ordinates and percentage of explained variation.
+
+        Raises:
+            NoDataSetTokenError: Raised if method called before a valid \
+            datasetToken is obtained or set.
+        '''
+
+        kwargs = get_kwargs()
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'getPCAPlot')
         url = self.BASE_URL + '/apiTask'
         r = requests.post( url, data = data)
 
@@ -363,8 +398,35 @@ class Phosphomatics(object):
         )
         return result
 
-    def makeLDAPlot (self, pval = None, pvalType = None, fc = None, transformation = None, container = None):
-        data = self.__addArgsToDefaultDict(args = kwargs, target = 'makeLDAPlot')
+    def getLDA (self, pval = 0.5, pvalType = 'raw', fc = 0.5, transformation = None):
+        '''
+        Returns linear discriminant analysis for data in selected data group.
+
+        Args:
+            pval (float): p-value used to filter phosphorylation sites prior to analysis. Setting the p-value to 0 will allow all phosphorylation sites to pass. Default = 0.5.
+
+            pvalType (str): Either 'raw' for raw p-values or 'BH' for Benjamini-Hochberg adjusted p-values. Default = 'raw'.
+
+            fc (float): fold-change used to filter phosphorylation sites prior to analysis. Setting this to 0 will allow all phosphorylation sites to pass. In the case of a >2 group analysis, this corresponds to the ANOVA F-value. Default = 0.5.
+
+            transformation (str): Specifies if data should be z-transformed prior to analysis. Either 'Z-Transform' to conduct transformation or any other value for untransformed data.
+
+        Returns:
+            Dict containing LDA data.
+
+           Dict has keys
+             - data - list of dicts with x,y coordinates of samples on LD1 and LD2 axes. Dicts have keys 'x', 'y', 'label', 'group'.
+             - xLabel - LD axis of x co-ordinates and percentage of explained variation.
+             - yLabel - LD axis of y co-ordinates and percentage of explained variation.
+
+        Raises:
+            NoDataSetTokenError: Raised if method called before a valid \
+            datasetToken is obtained or set.
+        '''
+
+        kwargs = get_kwargs()
+        print(kwargs)
+        data = self.__addArgsToDefaultDict(args = kwargs, target = 'getLDAPlot')
         url = self.BASE_URL + '/apiTask'
         r = requests.post( url, data = data)
 
